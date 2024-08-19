@@ -1,0 +1,9 @@
+nose2
+coverage
+flake8==3.8.0
+flake8-html
+junit2html
+antlr4-python3-runtime==4.13.1
+parameterized
+hypothesis
+mutatest

@@ -1,0 +1,58 @@
+#!/bin/bash
+
+TOOLS_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd "$TOOLS_ROOT/../test/test_apps" || exit 1
+TMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TMP_DIR"' EXIT
+
+###################################
+
+# Individual testing: change file name with test_*.py
+
+# file="test_mv.py" 
+
+# RES=$(basename "$file" .py | sed "s/^test_//")
+# HTML_FILE="$TMP_DIR/$RES.html"
+# echo "Running mutation tests for $RES..."
+# sed -i '1s/^/import sys\nimport os\nsys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))).replace("test", "src"))\n/' "$file"
+# mutatest -s "../../src/apps/$RES.py" -t "python3 -Wi -m unittest $file" 2>&1 -k nc cp ix | awk '{print $0 "\n"}' > "$HTML_FILE"
+# sed -i 's/$/<br>/' "$HTML_FILE"
+
+# RES=$(basename "$file" .py | sed "s/^test_//")
+# HTML_FILE="$TMP_DIR/$RES.html"
+# echo "Running mutation tests for $RES..."
+# sed -i '1s/^/import sys\nimport os\nsys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))).replace("test", "src"))\n/' "$file"
+# mutatest -s "../../src/apps/$RES.py" -t "python3 -Wi -m unittest $file" 2>&1 -k nc cp ix
+# sed -i 's/$/<br>/' "$HTML_FILE"
+
+####################################
+
+# All testing
+
+for file in *.py; do
+    RES=$(basename "$file" .py | sed "s/^test_//")
+    HTML_FILE="$TMP_DIR/$RES.html"
+    echo "Running mutation tests for $RES..."
+    sed -i '1s/^/import sys\nimport os\nsys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))).replace("test", "src"))\n/' "$file"
+    mutatest -s "../../src/apps/$RES.py" -t "python3 -Wi -m unittest $file" 2>&1 -k nc cp ix --rseed "6969" | awk '{print $0 "\n"}' > "$HTML_FILE"
+    sed -i 's/$/<br>/' "$HTML_FILE"
+done
+
+cd "$TOOLS_ROOT/../test/test_parser" || exit 1
+
+for file in *.py; do
+    if [ "$file" = "test_parse.py" ]; then
+        continue
+    fi
+    RES=$(basename "$file" .py | sed "s/^test_//")
+    HTML_FILE="$TMP_DIR/$RES.html"
+    echo "Running mutation tests for $RES..."
+    sed -i '1s/^/import sys\nimport os\nsys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))).replace("test", "src"))\n/' "$file"
+    mutatest -s "../../src/$RES.py" -t "python3 -Wi -m unittest $file" 2>&1 -k nc cp ix --rseed "6969" | awk '{print $0 "\n"}' > "$HTML_FILE"
+    sed -i 's/$/<br>/' "$HTML_FILE"
+done
+
+echo "OK"
+echo "Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ..."
+cd "$TMP_DIR"
+python3 -m http.server > /dev/null 2>&1

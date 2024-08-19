@@ -1,0 +1,15 @@
+T__0=1
+T__1=2
+T__2=3
+T__3=4
+T__4=5
+UNQUOTED=6
+SINGLE_QUOTED=7
+BACK_QUOTED=8
+DOUBLE_QUOTED=9
+WHITESPACE=10
+';'=1
+'|'=2
+'<'=3
+'>'=4
+'>>'=5
